@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from schema import FinanceAnalyticsPlan
+from finance_planner.schema import FinanceAnalyticsPlan
 
 
 def test_invalid_metric_name_raises_validation_error() -> None:
