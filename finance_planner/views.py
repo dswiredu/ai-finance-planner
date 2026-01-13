@@ -5,13 +5,15 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 
 from .llm import generate_plan
+from .validation import validate_plan
+
 
 @csrf_exempt
 @require_POST
 def generate_finance_plan(request):
     """
     POST endpoint that accepts a natural-language finance analytics request
-    and returns a validated FinanceAnalyticsPlan.
+    and returns a FinanceAnalyticsPlan along with a validation result.
 
     Expected payload:
     {
@@ -35,4 +37,14 @@ def generate_finance_plan(request):
         # Planner failure: invalid request or invalid LLM output
         return HttpResponseBadRequest(str(exc))
 
-    return JsonResponse(plan.model_dump(), status=200)
+    # -----------------------------
+    # Governance / Capability Validation
+    # -----------------------------
+    validation_result = validate_plan(plan)
+
+    response_payload = {
+        "plan": plan.model_dump(),
+        "validation": validation_result.model_dump(),
+    }
+
+    return JsonResponse(response_payload, status=200)
